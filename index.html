@@ -1,80 +1,152 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de RUC - Ecuador</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background: #f4f7f6; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #3ecf8e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #36b37a; }
-        #resultado { margin-top: 20px; padding: 15px; border-top: 1px solid #eee; display: none; }
-        .error { color: red; margin-top: 10px; font-size: 0.9em; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta RUC</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 16px;
+  width: 400px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 15px;
+  outline: none;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #2563eb;
+}
+
+.resultado {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+}
+
+.label {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.valor {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 14px;
+}
+</style>
+
 </head>
 <body>
 
-<div class="card">
-    <h2>Buscador de RUC</h2>
-    <p>Ingresa el número de RUC para consultar los datos:</p>
-    <input type="number" id="rucInput" placeholder="Ej: 190166953001">
-    <button onclick="buscarRUC()">Consultar Ahora</button>
+<div class="container">
+  <h1>Consulta RUC</h1>
 
-    <div id="loading" style="display:none;">Buscando...</div>
-    <div id="errorMsg" class="error"></div>
+  <input type="text" id="ruc" placeholder="Ingrese el RUC" onkeyup="if(event.key==='Enter') buscar()">
+  <button onclick="buscar()">Consultar</button>
 
-    <div id="resultado">
-        <strong>Razón Social:</strong> <span id="resRazon"></span><br><br>
-        <strong>Estado:</strong> <span id="resEstado"></span><br><br>
-        <strong>Actividad:</strong> <span id="resActividad"></span><br><br>
-        <strong>Obligado Contabilidad:</strong> <span id="resObligado"></span>
-    </div>
+  <div id="resultado"></div>
 </div>
 
 <script>
-    // 1. CONFIGURACIÓN (Reemplaza con tus datos de Supabase)
-    const SUPABASE_URL = 'TU_PROJECT_URL_AQUI';
-    const SUPABASE_KEY = 'TU_API_KEY_ANON_AQUI';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function buscar() {
+  const ruc = document.getElementById("ruc").value;
+  const div = document.getElementById("resultado");
 
-    async function buscarRUC() {
-        const ruc = document.getElementById('rucInput').value;
-        const resDiv = document.getElementById('resultado');
-        const errorMsg = document.getElementById('errorMsg');
-        
-        // Limpiar estados previos
-        resDiv.style.display = 'none';
-        errorMsg.innerText = '';
-        
-        if (!ruc) return;
+  if (!ruc) {
+    div.innerHTML = "<div class='loading'>Ingrese un RUC</div>";
+    return;
+  }
 
-        try {
-            // 2. LA CONSULTA
-            const { data, error } = await supabase
-                .from('padron_ruc') // Nombre de tu tabla
-                .select('*')
-                .eq('NUMERO_RUC', ruc) // Buscamos por la columna RUC
-                .single();
+  div.innerHTML = "<div class='loading'>Consultando...</div>";
 
-            if (error) throw error;
-
-            if (data) {
-                document.getElementById('resRazon').innerText = data.RAZON_SOCIAL;
-                document.getElementById('resEstado').innerText = data.ESTADO_CONTRIBUYENTE;
-                document.getElementById('resActividad').innerText = data.ACTIVIDAD_ECONOMICA;
-                document.getElementById('resObligado').innerText = data.OBLIGADO;
-                resDiv.style.display = 'block';
-            } else {
-                errorMsg.innerText = 'RUC no encontrado.';
-            }
-        } catch (err) {
-            console.error(err);
-            errorMsg.innerText = 'Error al consultar. Verifica el número.';
+  try {
+    const res = await fetch(
+      `https://fordyszrqqrjwhgvrohh.supabase.co/rest/v1/contribuyentes?ruc=eq.${ruc}`,
+      {
+        headers: {
+          "apikey": "sb_publishable_kuS6mWVWW6KRWJ_tvS1L7A_6g5jwTvz",
+          "Authorization": "Bearer sb_publishable_kuS6mWVWW6KRWJ_tvS1L7A_6g5jwTvz"
         }
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.length > 0) {
+      const c = data[0];
+
+      div.innerHTML = `
+        <div class="resultado">
+          <div class="label">RUC</div>
+          <div class="valor">${c.ruc}</div>
+
+          <div class="label">Razón Social</div>
+          <div class="valor">${c.razon_social}</div>
+
+          <div class="label">Agente de Retención</div>
+          <div class="valor">${c.agente_retencion}</div>
+
+          <div class="label">Contribuyente Especial</div>
+          <div class="valor">${c.especial}</div>
+        </div>
+      `;
+    } else {
+      div.innerHTML = "<div class='resultado'>❌ No encontrado</div>";
     }
+
+  } catch (error) {
+    div.innerHTML = "<div class='resultado'>⚠️ Error en la consulta</div>";
+  }
+}
 </script>
+
 </body>
 </html>
