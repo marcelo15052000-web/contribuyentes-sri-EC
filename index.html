@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Contribia</title>
+<title>Contribia - </title>
 
 <style>
 body {
@@ -220,10 +220,12 @@ function buscarGC() {
   const texto = document.getElementById("buscarGC").value.toLowerCase();
   const resultado = document.getElementById("resultadoGC");
 
-  const filtrados = grandesContribuyentes.filter(c =>
-    c.NUMERO_RUC.includes(texto) ||
-    c.RAZON_SOCIAL.toLowerCase().includes(texto)
-  );
+  const filtrados = grandesContribuyentes.filter(c => {
+    const ruc = (c.NUMERO_RUC || "").toString();
+    const nombre = (c.RAZON_SOCIAL || "").toLowerCase();
+
+    return ruc.includes(texto) || nombre.includes(texto);
+  });
 
   if (!filtrados.length) {
     resultado.innerHTML = "<p class='error'>❌ No encontrado</p>";
@@ -232,8 +234,8 @@ function buscarGC() {
 
   resultado.innerHTML = filtrados.map(c => `
     <div class="card">
-      <strong>${c.RAZON_SOCIAL}</strong><br>
-      RUC: ${c.NUMERO_RUC}
+      <strong>${c.RAZON_SOCIAL || "SIN NOMBRE"}</strong><br>
+      RUC: ${c.NUMERO_RUC || "N/A"}
     </div>
   `).join("");
 }
