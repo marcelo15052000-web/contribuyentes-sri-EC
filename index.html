@@ -1,159 +1,253 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Contribia</title>
+<meta charset="UTF-8">
+<title>Contribia</title>
 
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
 
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      width: 420px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      text-align: center;
-    }
+.container {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  width: 450px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
 
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
+.tabs {
+  display: flex;
+  margin-bottom: 15px;
+}
 
-    input {
-      width: 85%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
+.tab {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: center;
+  background: #eee;
+  margin-right: 5px;
+}
 
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      background: #667eea;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.tab.active {
+  background: #667eea;
+  color: white;
+}
 
-    button:hover {
-      background: #5a67d8;
-    }
+.content {
+  display: none;
+}
 
-    .card {
-      background: #f4f6fb;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
-      text-align: left;
-      font-size: 14px;
-    }
+.content.active {
+  display: block;
+}
 
-    .activo {
-      color: green;
-      font-weight: bold;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
 
-    .inactivo {
-      color: red;
-      font-weight: bold;
-    }
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #667eea;
+  color: white;
+  cursor: pointer;
+}
 
-    .error {
-      color: red;
-      margin-top: 15px;
-    }
+.card {
+  background: #f4f6fb;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 15px;
+  font-size: 14px;
+}
 
-  </style>
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.badge-green {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-yellow {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
-  <h5> Contribuyentes Especiales y Agentes de Retención.</h5>
-  <h1>🔎 Consulta RUC</h1>
 
-  <input type="text" id="ruc" placeholder="Ingresa el RUC">
-  <br>
-  <button onclick="buscarRUC()">Consultar</button>
+  <div class="tabs">
+    <div class="tab active" onclick="cambiarTab(0)">🔎 Consulta RUC</div>
+    <div class="tab" onclick="cambiarTab(1)">⭐ Grandes Contribuyentes</div>
+  </div>
 
-  <div id="resultado"></div>
+  <!-- TAB 1 -->
+  <div class="content active">
+    <input type="text" id="ruc" placeholder="Ingresa el RUC">
+    <button onclick="buscarRUC()">Consultar</button>
+    <div id="resultado"></div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div class="content">
+    <input type="text" id="buscarGC" placeholder="Buscar RUC o nombre">
+    <button onclick="buscarGC()">Buscar</button>
+    <div id="resultadoGC"></div>
+  </div>
+
 </div>
 
 <script>
   const SUPABASE_URL = "https://fordyszrqqrjwhgvrohh.supabase.co";
   const API_KEY = "sb_publishable_kuS6mWVWW6KRWJ_tvS1L7A_6g5jwTvz";
 
-  async function buscarRUC() {
-    const ruc = document.getElementById("ruc").value.trim();
-    const resultado = document.getElementById("resultado");
+let grandesContribuyentes = [];
 
-    if (!ruc) {
-      resultado.innerHTML = "<p class='error'>⚠️ Ingresa un RUC</p>";
+// 🚀 Cargar JSON
+async function cargarJSON() {
+  try {
+    const res = await fetch("gc.json");
+    grandesContribuyentes = await res.json();
+    console.log("✅ JSON cargado:", grandesContribuyentes.length);
+  } catch (error) {
+    console.error("❌ Error JSON", error);
+  }
+}
+
+cargarJSON();
+
+// Tabs
+function cambiarTab(index) {
+  document.querySelectorAll(".tab").forEach((t,i)=>{
+    t.classList.toggle("active", i === index);
+  });
+
+  document.querySelectorAll(".content").forEach((c,i)=>{
+    c.classList.toggle("active", i === index);
+  });
+}
+
+// 🔎 CONSULTA SUPABASE + VALIDACIÓN GC
+async function buscarRUC() {
+  const ruc = document.getElementById("ruc").value.trim();
+  const resultado = document.getElementById("resultado");
+
+  if (!ruc) {
+    resultado.innerHTML = "<p class='error'>⚠️ Ingresa un RUC</p>";
+    return;
+  }
+
+  resultado.innerHTML = "⏳ Buscando...";
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/contribuyentes?NUMERO_RUC=eq.${ruc}`,
+      {
+        headers: {
+          "apikey": API_KEY,
+          "Authorization": "Bearer " + API_KEY
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.length) {
+      resultado.innerHTML = "<p class='error'>❌ No encontrado</p>";
       return;
     }
 
-    resultado.innerHTML = "⏳ Buscando...";
+    const c = data[0];
 
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/contribuyentes?NUMERO_RUC=eq.${ruc}`,
-        {
-          headers: {
-            "apikey": API_KEY,
-            "Authorization": "Bearer " + API_KEY
-          }
-        }
-      );
+    // 🔥 Validar si es gran contribuyente
+    const esGC = grandesContribuyentes.some(gc => gc.NUMERO_RUC === ruc);
 
-      const data = await res.json();
+    resultado.innerHTML = `
+      <div class="card">
+        <strong>${c.RAZON_SOCIAL}</strong><br>
+        RUC: ${c.NUMERO_RUC}<br>
+        Estado: ${c.ESTADO_CONTRIBUYENTE}<br>
+        Tipo: ${c.TIPO_CONTRIBUYENTE}<br>
+        <br>
+        <span class="badge badge-green">
+          Agente Retención: ${c.AGENTE_RETENCION === "S" ? "Sí" : "No"}
+        </span>
+        <span class="badge badge-yellow">
+          Especial: ${c.ESPECIAL === "S" ? "Sí" : "No"}
+        </span>
+        ${esGC ? `<span class="badge badge-green">⭐ Gran Contribuyente</span>` : ""}
+      </div>
+    `;
 
-      if (!data.length) {
-        resultado.innerHTML = "<p class='error'>❌ No encontrado</p>";
-        return;
-      }
+  } catch (error) {
+    resultado.innerHTML = "<p class='error'>⚠️ Error al consultar</p>";
+    console.error(error);
+  }
+}
 
-      const c = data[0];
+// ⭐ BUSCAR EN JSON
+function buscarGC() {
+  const texto = document.getElementById("buscarGC").value.toLowerCase();
+  const resultado = document.getElementById("resultadoGC");
 
-      const estadoClass = c.ESTADO_CONTRIBUYENTE === "ACTIVO" ? "activo" : "inactivo";
+  const filtrados = grandesContribuyentes.filter(c =>
+    c.NUMERO_RUC.includes(texto) ||
+    c.RAZON_SOCIAL.toLowerCase().includes(texto)
+  );
 
-      resultado.innerHTML = `
-        <div class="card">
-          <strong>RUC:</strong> ${c.NUMERO_RUC} <br>
-          <strong>Razón Social:</strong> ${c.RAZON_SOCIAL} <br>
-          <strong>Tipo:</strong> ${c.TIPO_CONTRIBUYENTE} <br>
-          <strong>Estado:</strong> <span class="${estadoClass}">${c.ESTADO_CONTRIBUYENTE}</span> <br>
-          <strong>Actividad:</strong> ${c.ACTIVIDAD_ECONOMICA} <br>
-          <strong>Obligado a llevar contabilidad:</strong> ${c.OBLIGADO === "S" ? "Sí" : "No"} <br>
-          <strong>Agente de Retención:</strong> ${c.AGENTE_RETENCION === "S" ? "Sí" : "No"} <br>
-          <strong>Contribuyente Especial:</strong> ${c.ESPECIAL === "S" ? "Sí" : "No"}
-        </div>
-      `;
-
-    } catch (error) {
-      resultado.innerHTML = "<p class='error'>⚠️ Error al consultar</p>";
-      console.error(error);
-    }
+  if (!filtrados.length) {
+    resultado.innerHTML = "<p class='error'>❌ No encontrado</p>";
+    return;
   }
 
-  // Buscar con Enter 🔥
-  document.getElementById("ruc").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      buscarRUC();
-    }
+  resultado.innerHTML = filtrados.map(c => `
+    <div class="card">
+      <strong>${c.RAZON_SOCIAL}</strong><br>
+      RUC: ${c.NUMERO_RUC}
+    </div>
+  `).join("");
+}
+
+// 🔥 Enter en ambos inputs
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("ruc").addEventListener("keypress", e => {
+    if (e.key === "Enter") buscarRUC();
   });
+
+  document.getElementById("buscarGC").addEventListener("keypress", e => {
+    if (e.key === "Enter") buscarGC();
+  });
+});
 </script>
 
 </body>
