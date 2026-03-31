@@ -1,151 +1,158 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta RUC</title>
+  <meta charset="UTF-8">
+  <title>Consulta RUC</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-<style>
-body {
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+    }
 
-.container {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  padding: 30px;
-  border-radius: 16px;
-  width: 400px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-}
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
+    input {
+      width: 85%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
 
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  margin-bottom: 15px;
-  outline: none;
-  font-size: 16px;
-}
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #667eea;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #3b82f6;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
+    button:hover {
+      background: #5a67d8;
+    }
 
-button:hover {
-  background: #2563eb;
-}
+    .card {
+      background: #f4f6fb;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      text-align: left;
+      font-size: 14px;
+    }
 
-.resultado {
-  margin-top: 20px;
-  padding: 15px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.08);
-}
+    .activo {
+      color: green;
+      font-weight: bold;
+    }
 
-.label {
-  font-size: 12px;
-  color: #94a3b8;
-}
+    .inactivo {
+      color: red;
+      font-weight: bold;
+    }
 
-.valor {
-  font-size: 16px;
-  margin-bottom: 10px;
-}
+    .error {
+      color: red;
+      margin-top: 15px;
+    }
 
-.loading {
-  text-align: center;
-  font-size: 14px;
-}
-</style>
-
+  </style>
 </head>
+
 <body>
 
 <div class="container">
-  <h1>Consulta RUC</h1>
+  <h1>🔎 Consulta RUC</h1>
 
-  <input type="text" id="ruc" placeholder="Ingrese el RUC" onkeyup="if(event.key==='Enter') buscar()">
-  <button onclick="buscar()">Consultar</button>
+  <input type="text" id="ruc" placeholder="Ingresa el RUC">
+  <br>
+  <button onclick="buscarRUC()">Consultar</button>
 
   <div id="resultado"></div>
 </div>
 
 <script>
-async function buscar() {
-  const ruc = document.getElementById("ruc").value;
-  const div = document.getElementById("resultado");
+  const SUPABASE_URL = "https://TU_PROYECTO.supabase.co";
+  const API_KEY = "TU_API_KEY";
 
-  if (!ruc) {
-    div.innerHTML = "<div class='loading'>Ingrese un RUC</div>";
-    return;
-  }
+  async function buscarRUC() {
+    const ruc = document.getElementById("ruc").value.trim();
+    const resultado = document.getElementById("resultado");
 
-  div.innerHTML = "<div class='loading'>Consultando...</div>";
-
-  try {
-    const res = await fetch(
-      `https://fordyszrqqrjwhgvrohh.supabase.co/rest/v1/contribuyentes?ruc=eq.${ruc}`,
-      {
-        headers: {
-          "apikey": "sb_publishable_kuS6mWVWW6KRWJ_tvS1L7A_6g5jwTvz",
-          "Authorization": "Bearer sb_publishable_kuS6mWVWW6KRWJ_tvS1L7A_6g5jwTvz"
-        }
-      }
-    );
-
-    const data = await res.json();
-
-    if (data.length > 0) {
-      const c = data[0];
-
-      div.innerHTML = `
-        <div class="resultado">
-          <div class="label">RUC</div>
-          <div class="valor">${c.ruc}</div>
-
-          <div class="label">Razón Social</div>
-          <div class="valor">${c.razon_social}</div>
-
-          <div class="label">Agente de Retención</div>
-          <div class="valor">${c.agente_retencion}</div>
-
-          <div class="label">Contribuyente Especial</div>
-          <div class="valor">${c.especial}</div>
-        </div>
-      `;
-    } else {
-      div.innerHTML = "<div class='resultado'>❌ No encontrado</div>";
+    if (!ruc) {
+      resultado.innerHTML = "<p class='error'>⚠️ Ingresa un RUC</p>";
+      return;
     }
 
-  } catch (error) {
-    div.innerHTML = "<div class='resultado'>⚠️ Error en la consulta</div>";
+    resultado.innerHTML = "⏳ Buscando...";
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/contribuyentes?NUMERO_RUC=eq.${ruc}`,
+        {
+          headers: {
+            "apikey": API_KEY,
+            "Authorization": "Bearer " + API_KEY
+          }
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data.length) {
+        resultado.innerHTML = "<p class='error'>❌ No encontrado</p>";
+        return;
+      }
+
+      const c = data[0];
+
+      const estadoClass = c.ESTADO_CONTRIBUYENTE === "ACTIVO" ? "activo" : "inactivo";
+
+      resultado.innerHTML = `
+        <div class="card">
+          <strong>RUC:</strong> ${c.NUMERO_RUC} <br>
+          <strong>Razón Social:</strong> ${c.RAZON_SOCIAL} <br>
+          <strong>Tipo:</strong> ${c.TIPO_CONTRIBUYENTE} <br>
+          <strong>Estado:</strong> <span class="${estadoClass}">${c.ESTADO_CONTRIBUYENTE}</span> <br>
+          <strong>Actividad:</strong> ${c.ACTIVIDAD_ECONOMICA} <br>
+          <strong>Obligado a llevar contabilidad:</strong> ${c.OBLIGADO === "S" ? "Sí" : "No"} <br>
+          <strong>Agente de Retención:</strong> ${c.AGENTE_RETENCION === "S" ? "Sí" : "No"} <br>
+          <strong>Contribuyente Especial:</strong> ${c.ESPECIAL === "S" ? "Sí" : "No"}
+        </div>
+      `;
+
+    } catch (error) {
+      resultado.innerHTML = "<p class='error'>⚠️ Error al consultar</p>";
+      console.error(error);
+    }
   }
-}
+
+  // Buscar con Enter 🔥
+  document.getElementById("ruc").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      buscarRUC();
+    }
+  });
 </script>
 
 </body>
