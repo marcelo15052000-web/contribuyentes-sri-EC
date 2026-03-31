@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Contribia </title>
+<title>Contribia - Johana Garcia </title>
 
 <style>
 body {
@@ -159,7 +159,7 @@ function cambiarTab(index) {
 
 // 🔎 CONSULTA SUPABASE + VALIDACIÓN GC
 async function buscarRUC() {
-  const ruc = document.getElementById("ruc").value.trim();
+  let ruc = document.getElementById("ruc").value.trim();
   const resultado = document.getElementById("resultado");
 
   if (!ruc) {
