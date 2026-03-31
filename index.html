@@ -107,20 +107,20 @@ button {
 <div class="container">
 
   <div class="tabs">
-    <div class="tab active" onclick="cambiarTab(0)">🔎 Agentes de Retención y Contribuyentes Especiales</div>
+    <div class="tab active" onclick="cambiarTab(0)">🔎 Agentes Ret. y Contrib. Esp</div>
     <div class="tab" onclick="cambiarTab(1)">⭐ Grandes Contribuyentes</div>
   </div>
 
   <!-- TAB 1 -->
   <div class="content active">
     <input type="text" id="ruc" placeholder="Ingresa el RUC">
-    <button onclick="buscarRUC()">Consultar</button>
+    <button onclick="buscarRUC()">Buscar</button>
     <div id="resultado"></div>
   </div>
 
   <!-- TAB 2 -->
   <div class="content">
-    <input type="text" id="buscarGC" placeholder="Buscar RUC o nombre">
+    <input type="text" id="buscarGC" placeholder="Ingresa el RUC">
     <button onclick="buscarGC()">Buscar</button>
     <div id="resultadoGC"></div>
   </div>
