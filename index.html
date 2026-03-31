@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Contribia - </title>
+<title>Contribia - C</title>
 
 <style>
 body {
@@ -217,14 +217,16 @@ async function buscarRUC() {
 
 // ⭐ BUSCAR EN JSON
 function buscarGC() {
-  const texto = document.getElementById("buscarGC").value.toLowerCase();
+  const texto = document.getElementById("buscarGC").value.trim();
   const resultado = document.getElementById("resultadoGC");
 
-  const filtrados = grandesContribuyentes.filter(c => {
-    const ruc = (c.NUMERO_RUC || "").toString();
-    const nombre = (c.RAZON_SOCIAL || "").toLowerCase();
+  console.log("Buscando:", texto);
+  console.log("Total registros:", grandesContribuyentes.length);
 
-    return ruc.includes(texto) || nombre.includes(texto);
+  const filtrados = grandesContribuyentes.filter(c => {
+    const ruc = (c.RUC || "").toString().trim();
+
+    return ruc === texto; // exacto para evitar errores
   });
 
   if (!filtrados.length) {
@@ -235,7 +237,8 @@ function buscarGC() {
   resultado.innerHTML = filtrados.map(c => `
     <div class="card">
       <strong>${c.RAZON_SOCIAL || "SIN NOMBRE"}</strong><br>
-      RUC: ${c.NUMERO_RUC || "N/A"}
+      RUC: ${c.RUC || "N/A"}<br>
+      Oficio: ${c.OFICIO || "N/A"}
     </div>
   `).join("");
 }
