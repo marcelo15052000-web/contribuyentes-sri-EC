@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Contribia - Johana Garcia </title>
+<title>Contribia </title>
 
 <style>
 body {
@@ -166,8 +166,6 @@ async function buscarRUC() {
     resultado.innerHTML = "<p class='error'>⚠️ Ingresa un RUC</p>";
     return;
   }
-  // 🔥 QUITAR CEROS A LA IZQUIERDA
-  ruc = ruc.replace(/^0+/, "");
   resultado.innerHTML = "⏳ Buscando...";
 
   try {
